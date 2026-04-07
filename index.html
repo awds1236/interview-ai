@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>면접 대비 AI 어시스턴트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --bg: #F8FAFC;
+            --card: #FFFFFF;
+            --text: #1E293B;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --accent: #06B6D4;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 i {
+            font-size: 1.6rem;
+        }
+
+        /* API Key Setup */
+        .api-setup {
+            background: var(--card);
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 600px;
+            margin: 24px auto;
+            text-align: center;
+        }
+
+        .api-setup h3 {
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .api-setup p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .api-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .api-input-group input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .api-input-group button {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        /* Firebase Config */
+        .firebase-setup {
+            background: var(--card);
+            border: 2px dashed var(--warning);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 700px;
+            margin: 0 auto 24px;
+            text-align: center;
+        }
+
+        .firebase-setup h3 {
+            margin-bottom: 8px;
+            color: var(--warning);
+        }
+
+        .firebase-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .firebase-fields input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .firebase-fields input::placeholder {
+            color: #aaa;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-tab {
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.05);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-tab i {
+            font-size: 1rem;
+        }
+
+        .tab-bar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.02);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload i {
+            font-size: 2.5rem;
+            color: var(--primary-light);
+            margin-bottom: 12px;
+        }
+
+        .file-upload p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .file-upload .file-name {
+            color: var(--success);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Result Area */
+        .result-area {
+            background: #F1F5F9;
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-top: 16px;
+            min-height: 100px;
+            line-height: 1.8;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .result-area h1, .result-area h2, .result-area h3 {
+            margin: 16px 0 8px;
+            color: var(--primary-dark);
+        }
+
+        .result-area h1 { font-size: 1.3rem; }
+        .result-area h2 { font-size: 1.15rem; }
+        .result-area h3 { font-size: 1.05rem; }
+
+        .result-area ul, .result-area ol {
+            padding-left: 24px;
+            margin: 8px 0;
+        }
+
+        .result-area li {
+            margin-bottom: 4px;
+        }
+
+        .result-area strong {
+            color: var(--primary-dark);
+        }
+
+        .result-area .highlight-box {
+            background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(6,182,212,0.1));
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .result-placeholder {
+            color: var(--text-light);
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .result-placeholder i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            display: block;
+            color: var(--border);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .loading .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Uploaded files badge */
+        .uploaded-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .file-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .file-badge .remove-file {
+            cursor: pointer;
+            color: var(--danger);
+            font-size: 0.8rem;
+        }
+
+        /* Question list */
+        .question-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .question-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .question-item input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .question-item button {
+            padding: 8px 12px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* Firebase status */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+        }
+
+        /* Save/Load buttons */
+        .save-load-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .save-load-bar .btn {
+            font-size: 0.85rem;
+            padding: 8px 16px;
+        }
+
+        /* History items */
+        .history-item {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.02);
+        }
+
+        .history-item .title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .history-item .date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            background: var(--text);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.1rem; }
+            .nav-tab { padding: 12px 14px; font-size: 0.82rem; }
+            .nav-tab span.tab-label { display: none; }
+            .card { padding: 16px; }
+            .main { padding: 16px 12px; }
+            .api-input-group { flex-direction: column; }
+            .firebase-fields { grid-template-columns: 1fr; }
+            .result-area { padding: 16px; font-size: 0.9rem; }
+        }
+
+        @media (max-width: 480px) {
+            .header { padding: 14px 16px; }
+            .nav-tab { padding: 10px 12px; font-size: 0.8rem; }
+        }
+
+        /* Markdown rendering */
+        .result-area p { margin: 8px 0; }
+        .result-area code {
+            background: rgba(0,0,0,0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .result-area pre {
+            background: #1E293B;
+            color: #E2E8F0;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .result-area pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        .result-area blockquote {
+            border-left: 4px solid var(--primary);
+            padding: 8px 16px;
+            margin: 12px 0;
+            background: rgba(79,70,229,0.05);
+            border-radius: 0 8px 8px 0;
+        }
+        .result-area hr {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 16px 0;
+        }
+        .result-area table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        .result-area th, .result-area td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .result-area th {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="header-content">
+        <h1><i class="fas fa-robot"></i> 면접 AI 어시스턴트</h1>
+        <div class="status-bar">
+            <div class="status-dot" id="firebaseStatus"></div>
+            <span id="firebaseStatusText">Firebase 미연결</span>
+        </div>
+    </div>
+</header>
+
+<!-- Tab Navigation -->
+<div class="tab-bar">
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="setup">
+            <i class="fas fa-cog"></i> <span class="tab-label">설정</span>
+        </button>
+        <button class="nav-tab" data-tab="company">
+            <i class="fas fa-building"></i> <span class="tab-label">기업분석</span>
+        </button>
+        <button class="nav-tab" data-tab="resume">
+            <i class="fas fa-file-alt"></i> <span class="tab-label">자소서분석</span>
+        </button>
+        <button class="nav-tab" data-tab="custom-qa">
+            <i class="fas fa-comments"></i> <span class="tab-label">예상질문답변</span>
+        </button>
+        <button class="nav-tab" data-tab="tech">
+            <i class="fas fa-code"></i> <span class="tab-label">기술면접</span>
+        </button>
+        <button class="nav-tab" data-tab="history">
+            <i class="fas fa-history"></i> <span class="tab-label">기록</span>
+        </button>
+    </div>
+</div>
+
+<main class="main">
+
+    <!-- ============ SETUP TAB ============ -->
+    <div class="tab-content active" id="tab-setup">
+        <div class="api-setup">
+            <h3><i class="fas fa-key"></i> Gemini API 키 설정</h3>
+            <p>Google AI Studio에서 발급받은 API 키를 입력하세요.</p>
+            <div class="api-input-group">
+                <input type="password" id="apiKeyInput" placeholder="AIza...">
+                <button onclick="saveApiKey()">저장</button>
+            </div>
+        </div>
+
+        <div class="firebase-setup">
+            <h3><i class="fas fa-database"></i> Firebase 설정 (선택사항)</h3>
+            <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:8px;">
+                Firebase 콘솔에서 복사한 firebaseConfig JSON을 그대로 붙여넣으세요. 기록을 클라우드에 저장하여 모바일/웹에서 동기화할 수 있습니다.
+            </p>
+            <textarea id="fb-json" rows="10" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:'Consolas','Courier New',monospace; font-size:0.85rem; resize:vertical; background:#1E293B; color:#E2E8F0;" placeholder='{
+  "apiKey": "AIza...",
+  "authDomain": "your-app.firebaseapp.com",
+  "projectId": "your-app",
+  "storageBucket": "your-app.appspot.com",
+  "messagingSenderId": "123456789",
+  "appId": "1:123456789:web:abc123"
+}'></textarea>
+            <button class="btn btn-primary" style="margin-top:12px;" onclick="initFirebase()">
+                <i class="fas fa-plug"></i> Firebase 연결
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-title"><i class="fas fa-upload"></i> 자기소개서 & 프로젝트 기술서 업로드</div>
+            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:16px;">
+                여기서 업로드한 파일은 모든 탭에서 활용됩니다. (지원 형식: .txt, .pdf, .docx, .md)
+            </p>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                <div>
+                    <label style="font-weight:600; font-size:0.9rem; margin-bottom:8px; display:block;">자기소개서</label>
+                    <div class="file-upload" id="resumeUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>클릭하거나 파일을 드래그하세요</p>
+                        <div class="file-name" id="resumeFileName"></div>
+                        <input type="file" accept=".txt,.pdf,.md,.docx" onchange="handleFileUpload(event, 'resume')">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-weight:600; font-size:0.9rem; margin-bottom:8px; display:block;">프로젝트 기술서</label>
+                    <div class="file-upload" id="projectUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>클릭하거나 파일을 드래그하세요</p>
+                        <div class="file-name" id="projectFileName"></div>
+                        <input type="file" accept=".txt,.pdf,.md,.docx" onchange="handleFileUpload(event, 'project')">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ COMPANY TAB ============ -->
+    <div class="tab-content" id="tab-company">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-building"></i> 기업 분석 및 공략</div>
+            <div class="form-group">
+                <label>기업명</label>
+                <input type="text" id="companyName" placeholder="예: 삼성전자, 네이버, 카카오...">
+            </div>
+            <div class="form-group">
+                <label>지원 직무 (선택)</label>
+                <input type="text" id="companyPosition" placeholder="예: 백엔드 개발자, 데이터 엔지니어...">
+            </div>
+            <div class="form-group">
+                <label>추가 요청사항 (선택)</label>
+                <textarea id="companyExtra" rows="3" placeholder="특별히 알고 싶은 내용이 있다면 입력하세요..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="analyzeCompany()" id="companyBtn">
+                <i class="fas fa-search"></i> 기업 분석 시작
+            </button>
+        </div>
+        <div class="result-area" id="companyResult">
+            <div class="result-placeholder">
+                <i class="fas fa-building"></i>
+                기업명을 입력하고 분석을 시작하세요
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ RESUME TAB ============ -->
+    <div class="tab-content" id="tab-resume">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-file-alt"></i> 자기소개서 기반 면접 질문 예측</div>
+            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:12px;">
+                설정 탭에서 업로드한 자기소개서와 프로젝트 기술서를 바탕으로 면접관이 물어볼 예상 질문과 모범 답변을 생성합니다.
+            </p>
+            <div class="uploaded-files" id="resumeTabFiles"></div>
+            <div class="form-group" style="margin-top:12px;">
+                <label>지원 기업 / 직무 (선택)</label>
+                <input type="text" id="resumeCompany" placeholder="예: 네이버 / 프론트엔드 개발자">
+            </div>
+            <div class="form-group">
+                <label>면접 유형</label>
+                <select id="interviewType" style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:0.95rem; font-family:inherit;">
+                    <option value="general">일반 면접 (인성 + 직무)</option>
+                    <option value="personality">인성 면접</option>
+                    <option value="job">직무 면접</option>
+                    <option value="pressure">압박 면접</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="analyzeResume()" id="resumeBtn">
+                <i class="fas fa-brain"></i> 예상 질문 분석
+            </button>
+        </div>
+        <div class="result-area" id="resumeResult">
+            <div class="result-placeholder">
+                <i class="fas fa-file-alt"></i>
+                자기소개서를 업로드한 후 분석을 시작하세요
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ CUSTOM Q&A TAB ============ -->
+    <div class="tab-content" id="tab-custom-qa">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-comments"></i> 예상 질문 답변 생성</div>
+            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:16px;">
+                예상 질문을 입력하면 업로드한 자기소개서와 프로젝트 기술서를 바탕으로 맞춤 답변을 생성합니다.
+            </p>
+            <div class="uploaded-files" id="qaTabFiles"></div>
+
+            <div id="questionList" style="margin-top:16px;">
+                <div class="question-item">
+                    <input type="text" placeholder="예상 질문을 입력하세요..." class="qa-question">
+                    <button onclick="removeQuestion(this)"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <button class="btn btn-secondary" onclick="addQuestion()">
+                    <i class="fas fa-plus"></i> 질문 추가
+                </button>
+                <button class="btn btn-primary" onclick="generateAnswers()" id="qaBtn">
+                    <i class="fas fa-magic"></i> 답변 생성
+                </button>
+            </div>
+        </div>
+        <div class="result-area" id="qaResult">
+            <div class="result-placeholder">
+                <i class="fas fa-comments"></i>
+                예상 질문을 입력하고 답변 생성을 시작하세요
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ TECH TAB ============ -->
+    <div class="tab-content" id="tab-tech">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-code"></i> 기술 면접 예상 질문 생성</div>
+            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:12px;">
+                프로젝트 기술서를 바탕으로 기술 면접에서 나올 수 있는 심층 질문을 생성합니다.
+            </p>
+            <div class="uploaded-files" id="techTabFiles"></div>
+            <div class="form-group" style="margin-top:12px;">
+                <label>기술 분야 (선택)</label>
+                <input type="text" id="techField" placeholder="예: React, Spring Boot, AWS, 시스템 설계...">
+            </div>
+            <div class="form-group">
+                <label>난이도</label>
+                <select id="techDifficulty" style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:0.95rem; font-family:inherit;">
+                    <option value="junior">주니어 (1~3년차)</option>
+                    <option value="mid">미드레벨 (3~5년차)</option>
+                    <option value="senior">시니어 (5년차 이상)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>답변도 함께 생성</label>
+                <label style="font-weight:400; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="techWithAnswer" checked> 예상 질문과 함께 모범 답변도 생성합니다
+                </label>
+            </div>
+            <button class="btn btn-primary" onclick="generateTechQuestions()" id="techBtn">
+                <i class="fas fa-laptop-code"></i> 기술 면접 질문 생성
+            </button>
+        </div>
+        <div class="result-area" id="techResult">
+            <div class="result-placeholder">
+                <i class="fas fa-code"></i>
+                프로젝트 기술서를 업로드한 후 기술 면접 질문을 생성하세요
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ HISTORY TAB ============ -->
+    <div class="tab-content" id="tab-history">
+        <div class="card">
+            <div class="card-title"><i class="fas fa-history"></i> 분석 기록</div>
+            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:16px;">
+                이전에 생성한 분석 결과를 확인할 수 있습니다.
+            </p>
+            <div id="historyList">
+                <div class="result-placeholder">
+                    <i class="fas fa-history"></i>
+                    아직 저장된 기록이 없습니다
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<!-- PDF.js for PDF reading -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+// ========== STATE ==========
+let API_KEY = localStorage.getItem('gemini_api_key') || '';
+let db = null;
+let firebaseInitialized = false;
+
+const uploadedFiles = {
+    resume: { name: '', content: '' },
+    project: { name: '', content: '' }
+};
+
+const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+    if (API_KEY) {
+        document.getElementById('apiKeyInput').value = '••••••••••••';
+    }
+
+    // Restore firebase config
+    const fbConfig = localStorage.getItem('firebase_config') || '';
+    if (fbConfig) {
+        document.getElementById('fb-json').value = fbConfig;
+        try { initFirebase(true); } catch(e) {}
+    }
+
+    // Tab switching
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            updateFileIndicators();
+        });
+    });
+
+    renderHistory();
+});
+
+// ========== API KEY ==========
+function saveApiKey() {
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key || key === '••••••••••••') {
+        showToast('API 키를 입력하세요', 'error');
+        return;
+    }
+    API_KEY = key;
+    localStorage.setItem('gemini_api_key', key);
+    document.getElementById('apiKeyInput').value = '••••••••••••';
+    showToast('API 키가 저장되었습니다', 'success');
+}
+
+// ========== FIREBASE ==========
+function initFirebase(silent = false) {
+    const raw = document.getElementById('fb-json').value.trim();
+    if (!raw) {
+        if (!silent) showToast('Firebase 설정 JSON을 입력하세요', 'error');
+        return;
+    }
+
+    let config;
+    try {
+        // const firebaseConfig = { ... } 형식도 지원
+        let jsonStr = raw;
+        // "const firebaseConfig = " 또는 "var firebaseConfig = " 제거
+        jsonStr = jsonStr.replace(/^(const|let|var)\s+\w+\s*=\s*/, '');
+        // 끝의 세미콜론 제거
+        jsonStr = jsonStr.replace(/;\s*$/, '');
+        config = JSON.parse(jsonStr);
+    } catch (e) {
+        if (!silent) showToast('JSON 형식이 올바르지 않습니다. Firebase 콘솔에서 복사한 설정을 붙여넣으세요.', 'error');
+        return;
+    }
+
+    if (!config.apiKey || !config.projectId) {
+        if (!silent) showToast('apiKey와 projectId는 필수입니다', 'error');
+        return;
+    }
+
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(config);
+        }
+        db = firebase.firestore();
+        firebaseInitialized = true;
+        document.getElementById('firebaseStatus').classList.add('connected');
+        document.getElementById('firebaseStatusText').textContent = 'Firebase 연결됨';
+        localStorage.setItem('firebase_config', raw);
+        if (!silent) showToast('Firebase 연결 성공!', 'success');
+
+        // Sign in anonymously
+        firebase.auth().signInAnonymously().catch(e => console.warn('Anonymous auth failed:', e));
+
+        loadHistoryFromFirebase();
+    } catch (e) {
+        if (!silent) showToast('Firebase 연결 실패: ' + e.message, 'error');
+    }
+}
+
+// ========== FILE UPLOAD ==========
+async function handleFileUpload(event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const nameEl = document.getElementById(type === 'resume' ? 'resumeFileName' : 'projectFileName');
+
+    try {
+        let text = '';
+        if (file.name.endsWith('.pdf')) {
+            text = await readPDF(file);
+        } else {
+            text = await file.text();
+        }
+
+        uploadedFiles[type] = { name: file.name, content: text };
+        nameEl.textContent = '✅ ' + file.name;
+        showToast(`${type === 'resume' ? '자기소개서' : '프로젝트 기술서'} 업로드 완료`, 'success');
+        updateFileIndicators();
+    } catch (e) {
+        showToast('파일 읽기 실패: ' + e.message, 'error');
+    }
+}
+
+async function readPDF(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let text = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(' ') + '\n';
+    }
+    return text;
+}
+
+function updateFileIndicators() {
+    ['resumeTabFiles', 'qaTabFiles', 'techTabFiles'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        let html = '';
+        if (uploadedFiles.resume.name) {
+            html += `<span class="file-badge"><i class="fas fa-file-alt"></i> ${uploadedFiles.resume.name}</span>`;
+        }
+        if (uploadedFiles.project.name) {
+            html += `<span class="file-badge"><i class="fas fa-project-diagram"></i> ${uploadedFiles.project.name}</span>`;
+        }
+        if (!html) {
+            html = '<span style="font-size:0.85rem; color:var(--danger);">⚠️ 설정 탭에서 파일을 먼저 업로드하세요</span>';
+        }
+        el.innerHTML = html;
+    });
+}
+
+// ========== GEMINI API ==========
+async function callGemini(prompt) {
+    if (!API_KEY) {
+        showToast('설정 탭에서 API 키를 먼저 입력하세요', 'error');
+        throw new Error('No API key');
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-preview:generateContent?key=${API_KEY}`;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+                temperature: 0.7,
+                topP: 0.95,
+                topK: 40,
+                maxOutputTokens: 8192
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error?.message || 'API 호출 실패');
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '응답을 생성할 수 없습니다.';
+}
+
+// ========== MARKDOWN RENDERER ==========
+function renderMarkdown(text) {
+    // Simple markdown to HTML
+    let html = text
+        // Code blocks
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="lang-$1">$2</code></pre>')
+        // Inline code
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        // Headers
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        // Bold
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        // Italic
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Horizontal rule
+        .replace(/^---$/gm, '<hr>')
+        // Blockquote
+        .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+        // Unordered list
+        .replace(/^[•\-\*] (.+)$/gm, '<li>$1</li>')
+        // Ordered list
+        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+        // Line breaks
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+
+    // Wrap consecutive <li> in <ul>
+    html = html.replace(/(<li>.*?<\/li>)(\s*<br>)*\s*(<li>)/g, '$1$3');
+    html = html.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
+    // Remove nested <ul>
+    html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+    // Wrap in paragraph
+    html = '<p>' + html + '</p>';
+    // Clean up empty paragraphs
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    html = html.replace(/<p>\s*(<h[123]>)/g, '$1');
+    html = html.replace(/(<\/h[123]>)\s*<\/p>/g, '$1');
+    html = html.replace(/<p>\s*(<ul>)/g, '$1');
+    html = html.replace(/(<\/ul>)\s*<\/p>/g, '$1');
+    html = html.replace(/<p>\s*(<pre>)/g, '$1');
+    html = html.replace(/(<\/pre>)\s*<\/p>/g, '$1');
+    html = html.replace(/<p>\s*(<hr>)/g, '$1');
+    html = html.replace(/(<hr>)\s*<\/p>/g, '$1');
+    html = html.replace(/<p>\s*(<blockquote>)/g, '$1');
+    html = html.replace(/(<\/blockquote>)\s*<\/p>/g, '$1');
+
+    return html;
+}
+
+// ========== FEATURE 1: COMPANY ANALYSIS ==========
+async function analyzeCompany() {
+    const name = document.getElementById('companyName').value.trim();
+    if (!name) {
+        showToast('기업명을 입력하세요', 'error');
+        return;
+    }
+
+    const position = document.getElementById('companyPosition').value.trim();
+    const extra = document.getElementById('companyExtra').value.trim();
+    const btn = document.getElementById('companyBtn');
+    const resultEl = document.getElementById('companyResult');
+
+    btn.disabled = true;
+    resultEl.innerHTML = '<div class="loading"><div class="spinner"></div> AI가 기업을 분석하고 있습니다...</div>';
+
+    const prompt = `당신은 한국 취업 면접 전문 컨설턴트입니다. 아래 기업에 대해 면접 대비를 위한 심층 분석을 해주세요.
+
+**기업명**: ${name}
+${position ? `**지원 직무**: ${position}` : ''}
+${extra ? `**추가 요청**: ${extra}` : ''}
+
+다음 구조로 상세하게 분석해주세요:
+
+## 1. 기업 개요
+- 설립연도, 대표, 본사 위치
+- 주요 사업 분야
+- 기업 규모 (직원 수, 매출 등)
+
+## 2. 기업 비전 및 미션
+- 기업의 핵심 비전과 미션
+- 핵심 가치(Core Values)
+- 중장기 전략 방향
+
+## 3. 주요 사업 및 서비스
+- 각 사업부/서비스별 상세 설명
+- 시장에서의 위치와 경쟁력
+- 최근 주목할만한 프로젝트나 성과
+
+## 4. 기업 문화 및 조직
+- 조직 문화 특성
+- 인재상
+- 복리후생 및 근무 환경
+
+## 5. 최근 동향 및 이슈
+- 최근 뉴스 및 주요 이슈
+- 산업 트렌드와의 관계
+- 성장 가능성과 리스크
+
+## 6. 면접 전략
+- 이 기업 면접에서 강조해야 할 포인트
+- 자주 나오는 면접 질문 유형
+${position ? `- ${position} 직무 관련 핵심 역량` : ''}
+- 면접에서 피해야 할 것들
+
+---
+
+## ⭐ 핵심 요약 (반드시 기억할 것!)
+마지막에 면접장에 들어가기 전 반드시 기억해야 할 핵심 포인트 5~7가지를 강조하여 정리해주세요. 각 포인트는 굵은 글씨로 표시하고, 면접에서 바로 활용할 수 있도록 구체적으로 작성해주세요.`;
+
+    try {
+        const result = await callGemini(prompt);
+        resultEl.innerHTML = renderMarkdown(result);
+        saveToHistory('company', `기업분석: ${name}`, result);
+    } catch (e) {
+        resultEl.innerHTML = `<div class="result-placeholder" style="color:var(--danger);">❌ 오류: ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ========== FEATURE 2: RESUME ANALYSIS ==========
+async function analyzeResume() {
+    if (!uploadedFiles.resume.content) {
+        showToast('설정 탭에서 자기소개서를 먼저 업로드하세요', 'error');
+        return;
+    }
+
+    const company = document.getElementById('resumeCompany').value.trim();
+    const type = document.getElementById('interviewType').value;
+    const btn = document.getElementById('resumeBtn');
+    const resultEl = document.getElementById('resumeResult');
+
+    const typeLabels = {
+        general: '일반 면접 (인성 + 직무)',
+        personality: '인성 면접',
+        job: '직무 면접',
+        pressure: '압박 면접'
+    };
+
+    btn.disabled = true;
+    resultEl.innerHTML = '<div class="loading"><div class="spinner"></div> AI가 자기소개서를 분석하고 있습니다...</div>';
+
+    const prompt = `당신은 한국 대기업 면접관 경력 15년의 면접 전문가입니다.
+
+아래 자기소개서${uploadedFiles.project.content ? '와 프로젝트 기술서' : ''}를 꼼꼼히 분석하여 면접에서 나올 수 있는 예상 질문과 모범 답변을 작성해주세요.
+
+**면접 유형**: ${typeLabels[type]}
+${company ? `**지원 기업/직무**: ${company}` : ''}
+
+---
+### 자기소개서 내용:
+${uploadedFiles.resume.content}
+
+${uploadedFiles.project.content ? `---
+### 프로젝트 기술서 내용:
+${uploadedFiles.project.content}` : ''}
+---
+
+다음 형식으로 작성해주세요:
+
+## 📋 자기소개서 핵심 분석
+- 자기소개서의 강점과 약점 간단 분석
+- 면접관이 주목할 포인트
+
+## 📝 예상 질문 및 모범 답변
+
+각 질문에 대해:
+### Q1. [질문]
+**질문 의도**: 면접관이 이 질문을 하는 이유
+**모범 답변**: 자기소개서 내용을 기반으로 한 구체적인 답변 (STAR 기법 활용)
+**주의사항**: 답변 시 유의할 점
+
+최소 8~10개의 예상 질문을 생성해주세요.
+${type === 'pressure' ? '압박 면접 스타일의 날카로운 질문도 포함해주세요.' : ''}
+
+---
+## ⭐ 면접 핵심 전략
+마지막에 이 자기소개서를 가지고 면접을 볼 때 반드시 기억해야 할 핵심 전략을 정리해주세요.`;
+
+    try {
+        const result = await callGemini(prompt);
+        resultEl.innerHTML = renderMarkdown(result);
+        saveToHistory('resume', `자소서분석${company ? ': ' + company : ''}`, result);
+    } catch (e) {
+        resultEl.innerHTML = `<div class="result-placeholder" style="color:var(--danger);">❌ 오류: ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ========== FEATURE 3: CUSTOM Q&A ==========
+function addQuestion() {
+    const list = document.getElementById('questionList');
+    const div = document.createElement('div');
+    div.className = 'question-item';
+    div.innerHTML = `
+        <input type="text" placeholder="예상 질문을 입력하세요..." class="qa-question">
+        <button onclick="removeQuestion(this)"><i class="fas fa-times"></i></button>
+    `;
+    list.appendChild(div);
+}
+
+function removeQuestion(btn) {
+    const items = document.querySelectorAll('.question-item');
+    if (items.length <= 1) {
+        showToast('최소 1개의 질문이 필요합니다', 'error');
+        return;
+    }
+    btn.closest('.question-item').remove();
+}
+
+async function generateAnswers() {
+    const questions = Array.from(document.querySelectorAll('.qa-question'))
+        .map(el => el.value.trim())
+        .filter(q => q);
+
+    if (questions.length === 0) {
+        showToast('최소 1개 이상의 질문을 입력하세요', 'error');
+        return;
+    }
+
+    if (!uploadedFiles.resume.content && !uploadedFiles.project.content) {
+        showToast('설정 탭에서 자기소개서 또는 프로젝트 기술서를 업로드하세요', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('qaBtn');
+    const resultEl = document.getElementById('qaResult');
+
+    btn.disabled = true;
+    resultEl.innerHTML = '<div class="loading"><div class="spinner"></div> AI가 맞춤 답변을 생성하고 있습니다...</div>';
+
+    const questionList = questions.map((q, i) => `${i + 1}. ${q}`).join('\n');
+
+    const prompt = `당신은 한국 취업 면접 코치입니다. 지원자의 자기소개서와 프로젝트 기술서를 바탕으로 아래 예상 질문들에 대한 맞춤 답변을 작성해주세요.
+
+${uploadedFiles.resume.content ? `---
+### 자기소개서:
+${uploadedFiles.resume.content}` : ''}
+
+${uploadedFiles.project.content ? `---
+### 프로젝트 기술서:
+${uploadedFiles.project.content}` : ''}
+
+---
+### 예상 질문 목록:
+${questionList}
+
+---
+
+각 질문에 대해 다음 형식으로 답변을 작성해주세요:
+
+### Q${questions.length > 1 ? '1' : ''}. [질문 내용]
+
+**핵심 키워드**: 답변에 반드시 포함해야 할 키워드 3~5개
+
+**모범 답변**:
+자기소개서와 프로젝트 내용을 구체적으로 인용하면서, STAR 기법(상황-과제-행동-결과)을 활용한 체계적인 답변을 작성해주세요. 실제 면접에서 말하듯 자연스러운 어투로 작성해주세요.
+
+**답변 전략**: 이 답변에서 강조해야 할 포인트와 유의사항
+
+**꼬리질문 대비**: 이 답변 후 나올 수 있는 추가 질문 2~3개와 간단한 답변 방향
+
+---
+
+모든 질문에 대해 위 형식으로 작성해주세요.
+
+## ⭐ 종합 답변 전략
+마지막에 전체 질문들을 관통하는 핵심 답변 전략과 면접 팁을 정리해주세요.`;
+
+    try {
+        const result = await callGemini(prompt);
+        resultEl.innerHTML = renderMarkdown(result);
+        saveToHistory('custom-qa', `예상질문 ${questions.length}개 답변`, result);
+    } catch (e) {
+        resultEl.innerHTML = `<div class="result-placeholder" style="color:var(--danger);">❌ 오류: ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ========== FEATURE 4: TECH INTERVIEW ==========
+async function generateTechQuestions() {
+    if (!uploadedFiles.project.content) {
+        showToast('설정 탭에서 프로젝트 기술서를 먼저 업로드하세요', 'error');
+        return;
+    }
+
+    const field = document.getElementById('techField').value.trim();
+    const difficulty = document.getElementById('techDifficulty').value;
+    const withAnswer = document.getElementById('techWithAnswer').checked;
+    const btn = document.getElementById('techBtn');
+    const resultEl = document.getElementById('techResult');
+
+    const diffLabels = { junior: '주니어 (1~3년차)', mid: '미드레벨 (3~5년차)', senior: '시니어 (5년차 이상)' };
+
+    btn.disabled = true;
+    resultEl.innerHTML = '<div class="loading"><div class="spinner"></div> AI가 기술 면접 질문을 생성하고 있습니다...</div>';
+
+    const prompt = `당신은 테크 기업의 시니어 엔지니어이자 기술 면접관입니다. 아래 프로젝트 기술서를 분석하여 기술 면접 예상 질문을 생성해주세요.
+
+**난이도**: ${diffLabels[difficulty]}
+${field ? `**기술 분야**: ${field}` : ''}
+
+---
+### 프로젝트 기술서:
+${uploadedFiles.project.content}
+
+${uploadedFiles.resume.content ? `---
+### 자기소개서 (참고):
+${uploadedFiles.resume.content}` : ''}
+---
+
+다음 카테고리별로 기술 면접 예상 질문을 생성해주세요:
+
+## 🔧 프로젝트 기반 질문
+프로젝트에서 사용한 기술, 아키텍처, 설계 결정에 대한 질문 (5~7개)
+
+## 💡 기술 심화 질문
+프로젝트에서 사용한 기술 스택의 내부 동작 원리, 장단점 비교 등 (5~7개)
+
+## 🏗️ 시스템 설계 질문
+프로젝트를 확장하거나 개선하는 시나리오 기반 질문 (3~5개)
+
+## 🐛 트러블슈팅 질문
+프로젝트에서 겪었을 수 있는 문제 상황과 해결 방법 (3~5개)
+
+## 🎯 상황 판단 질문
+기술적 의사결정이 필요한 상황 제시 (2~3개)
+
+${withAnswer ? `
+각 질문에 대해 다음 형식으로 작성해주세요:
+
+### Q. [질문]
+**의도**: 면접관이 이 질문으로 확인하려는 역량
+**모범 답변**: 프로젝트 경험을 바탕으로 한 구체적인 답변
+**평가 포인트**: 좋은 답변과 나쁜 답변의 차이
+` : '질문만 나열해주세요. 답변은 포함하지 않습니다.'}
+
+---
+## ⭐ 기술 면접 대비 핵심 체크리스트
+마지막에 이 프로젝트로 기술 면접을 볼 때 반드시 준비해야 할 핵심 주제와 개념을 체크리스트로 정리해주세요.`;
+
+    try {
+        const result = await callGemini(prompt);
+        resultEl.innerHTML = renderMarkdown(result);
+        saveToHistory('tech', `기술면접${field ? ': ' + field : ''}`, result);
+    } catch (e) {
+        resultEl.innerHTML = `<div class="result-placeholder" style="color:var(--danger);">❌ 오류: ${e.message}</div>`;
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ========== HISTORY ==========
+function saveToHistory(type, title, content) {
+    const item = {
+        id: Date.now().toString(),
+        type,
+        title,
+        content,
+        date: new Date().toLocaleString('ko-KR')
+    };
+
+    history.unshift(item);
+    if (history.length > 50) history.pop();
+    localStorage.setItem('interview_history', JSON.stringify(history));
+
+    // Save to Firebase
+    if (firebaseInitialized && db) {
+        const user = firebase.auth().currentUser;
+        if (user) {
+            db.collection('users').doc(user.uid).collection('history').doc(item.id).set(item)
+                .catch(e => console.warn('Firebase save failed:', e));
+        }
+    }
+
+    renderHistory();
+}
+
+function renderHistory() {
+    const el = document.getElementById('historyList');
+    if (history.length === 0) {
+        el.innerHTML = '<div class="result-placeholder"><i class="fas fa-history"></i>아직 저장된 기록이 없습니다</div>';
+        return;
+    }
+
+    const typeIcons = {
+        company: 'fa-building',
+        resume: 'fa-file-alt',
+        'custom-qa': 'fa-comments',
+        tech: 'fa-code'
+    };
+
+    const typeLabels = {
+        company: '기업분석',
+        resume: '자소서분석',
+        'custom-qa': '예상질문',
+        tech: '기술면접'
+    };
+
+    el.innerHTML = history.map(item => `
+        <div class="history-item" onclick="viewHistory('${item.id}')">
+            <div class="title">
+                <i class="fas ${typeIcons[item.type] || 'fa-file'}"></i>
+                ${item.title}
+            </div>
+            <div class="date">${item.date}</div>
+        </div>
+    `).join('');
+}
+
+function viewHistory(id) {
+    const item = history.find(h => h.id === id);
+    if (!item) return;
+
+    const tabMap = {
+        company: 'company',
+        resume: 'resume',
+        'custom-qa': 'custom-qa',
+        tech: 'tech'
+    };
+
+    // Switch tab
+    const tabName = tabMap[item.type];
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    document.getElementById('tab-' + tabName).classList.add('active');
+
+    // Show result
+    const resultEl = document.getElementById(tabName.replace('-', '') + 'Result') ||
+                     document.getElementById(item.type + 'Result') ||
+                     document.getElementById('companyResult');
+
+    // Map correct result element
+    const resultMap = {
+        company: 'companyResult',
+        resume: 'resumeResult',
+        'custom-qa': 'qaResult',
+        tech: 'techResult'
+    };
+
+    const targetEl = document.getElementById(resultMap[item.type]);
+    if (targetEl) {
+        targetEl.innerHTML = renderMarkdown(item.content);
+    }
+}
+
+async function loadHistoryFromFirebase() {
+    if (!firebaseInitialized || !db) return;
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        // Wait for auth
+        firebase.auth().onAuthStateChanged(async (u) => {
+            if (u) {
+                try {
+                    const snapshot = await db.collection('users').doc(u.uid).collection('history')
+                        .orderBy('date', 'desc').limit(50).get();
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (!history.find(h => h.id === data.id)) {
+                            history.push(data);
+                        }
+                    });
+                    history.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    localStorage.setItem('interview_history', JSON.stringify(history));
+                    renderHistory();
+                } catch (e) {
+                    console.warn('Firebase load failed:', e);
+                }
+            }
+        });
+    }
+}
+
+// ========== TOAST ==========
+function showToast(message, type = '') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => { toast.className = 'toast'; }, 3000);
+}
+</script>
+
+</body>
+</html>
