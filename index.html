@@ -726,7 +726,7 @@
         <div class="card">
             <div class="card-title"><i class="fas fa-upload"></i> 자기소개서 & 프로젝트 기술서 업로드</div>
             <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:16px;">
-                여기서 업로드한 파일은 모든 탭에서 활용됩니다. (지원 형식: .txt, .pdf, .docx, .md)
+                여기서 업로드한 파일은 모든 탭에서 활용됩니다. 여러 파일을 동시에 업로드할 수 있습니다. (지원 형식: .txt, .pdf, .docx, .md)
             </p>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
@@ -734,19 +734,19 @@
                     <label style="font-weight:600; font-size:0.9rem; margin-bottom:8px; display:block;">자기소개서</label>
                     <div class="file-upload" id="resumeUpload">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <p>클릭하거나 파일을 드래그하세요</p>
-                        <div class="file-name" id="resumeFileName"></div>
-                        <input type="file" accept=".txt,.pdf,.md,.docx" onchange="handleFileUpload(event, 'resume')">
+                        <p>클릭하거나 파일을 드래그하세요<br><span style="font-size:0.8rem;">(여러 파일 선택 가능)</span></p>
+                        <input type="file" accept=".txt,.pdf,.md,.docx" multiple onchange="handleMultiFileUpload(event, 'resume')">
                     </div>
+                    <div class="uploaded-files" id="resumeFileList" style="margin-top:8px;"></div>
                 </div>
                 <div>
                     <label style="font-weight:600; font-size:0.9rem; margin-bottom:8px; display:block;">프로젝트 기술서</label>
                     <div class="file-upload" id="projectUpload">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <p>클릭하거나 파일을 드래그하세요</p>
-                        <div class="file-name" id="projectFileName"></div>
-                        <input type="file" accept=".txt,.pdf,.md,.docx" onchange="handleFileUpload(event, 'project')">
+                        <p>클릭하거나 파일을 드래그하세요<br><span style="font-size:0.8rem;">(여러 파일 선택 가능)</span></p>
+                        <input type="file" accept=".txt,.pdf,.md,.docx" multiple onchange="handleMultiFileUpload(event, 'project')">
                     </div>
+                    <div class="uploaded-files" id="projectFileList" style="margin-top:8px;"></div>
                 </div>
             </div>
         </div>
@@ -919,8 +919,8 @@ let db = null;
 let firebaseInitialized = false;
 
 const uploadedFiles = {
-    resume: { name: '', content: '' },
-    project: { name: '', content: '' }
+    resume: [],   // [{ name, content }, ...]
+    project: []   // [{ name, content }, ...]
 };
 
 const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
@@ -1013,27 +1013,62 @@ function initFirebase(silent = false) {
 }
 
 // ========== FILE UPLOAD ==========
-async function handleFileUpload(event, type) {
-    const file = event.target.files[0];
-    if (!file) return;
+async function handleMultiFileUpload(event, type) {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
 
-    const nameEl = document.getElementById(type === 'resume' ? 'resumeFileName' : 'projectFileName');
+    const label = type === 'resume' ? '자기소개서' : '프로젝트 기술서';
+    let successCount = 0;
 
-    try {
-        let text = '';
-        if (file.name.endsWith('.pdf')) {
-            text = await readPDF(file);
-        } else {
-            text = await file.text();
+    for (const file of files) {
+        // 중복 파일명 방지
+        if (uploadedFiles[type].some(f => f.name === file.name)) {
+            showToast(`"${file.name}" 은 이미 추가되어 있습니다`, 'error');
+            continue;
         }
-
-        uploadedFiles[type] = { name: file.name, content: text };
-        nameEl.textContent = '✅ ' + file.name;
-        showToast(`${type === 'resume' ? '자기소개서' : '프로젝트 기술서'} 업로드 완료`, 'success');
-        updateFileIndicators();
-    } catch (e) {
-        showToast('파일 읽기 실패: ' + e.message, 'error');
+        try {
+            let text = '';
+            if (file.name.endsWith('.pdf')) {
+                text = await readPDF(file);
+            } else {
+                text = await file.text();
+            }
+            uploadedFiles[type].push({ name: file.name, content: text });
+            successCount++;
+        } catch (e) {
+            showToast(`"${file.name}" 읽기 실패: ${e.message}`, 'error');
+        }
     }
+
+    if (successCount > 0) {
+        showToast(`${label} ${successCount}개 파일 업로드 완료 (총 ${uploadedFiles[type].length}개)`, 'success');
+    }
+    renderUploadedFileList(type);
+    updateFileIndicators();
+    // input 초기화 (같은 파일 재선택 가능하도록)
+    event.target.value = '';
+}
+
+function renderUploadedFileList(type) {
+    const listEl = document.getElementById(type + 'FileList');
+    if (!listEl) return;
+    if (uploadedFiles[type].length === 0) {
+        listEl.innerHTML = '';
+        return;
+    }
+    listEl.innerHTML = uploadedFiles[type].map((f, i) => `
+        <span class="file-badge">
+            <i class="fas fa-file-alt"></i> ${f.name}
+            <i class="fas fa-times-circle remove-file" onclick="removeUploadedFile('${type}', ${i})" title="삭제"></i>
+        </span>
+    `).join('');
+}
+
+function removeUploadedFile(type, index) {
+    const removed = uploadedFiles[type].splice(index, 1);
+    showToast(`"${removed[0].name}" 제거됨`, 'success');
+    renderUploadedFileList(type);
+    updateFileIndicators();
 }
 
 async function readPDF(file) {
@@ -1048,17 +1083,25 @@ async function readPDF(file) {
     return text;
 }
 
+function getResumeContent() {
+    return uploadedFiles.resume.map(f => `[${f.name}]\n${f.content}`).join('\n\n---\n\n');
+}
+
+function getProjectContent() {
+    return uploadedFiles.project.map(f => `[${f.name}]\n${f.content}`).join('\n\n---\n\n');
+}
+
 function updateFileIndicators() {
     ['resumeTabFiles', 'qaTabFiles', 'techTabFiles'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         let html = '';
-        if (uploadedFiles.resume.name) {
-            html += `<span class="file-badge"><i class="fas fa-file-alt"></i> ${uploadedFiles.resume.name}</span>`;
-        }
-        if (uploadedFiles.project.name) {
-            html += `<span class="file-badge"><i class="fas fa-project-diagram"></i> ${uploadedFiles.project.name}</span>`;
-        }
+        uploadedFiles.resume.forEach(f => {
+            html += `<span class="file-badge"><i class="fas fa-file-alt"></i> ${f.name}</span>`;
+        });
+        uploadedFiles.project.forEach(f => {
+            html += `<span class="file-badge"><i class="fas fa-project-diagram"></i> ${f.name}</span>`;
+        });
         if (!html) {
             html = '<span style="font-size:0.85rem; color:var(--danger);">⚠️ 설정 탭에서 파일을 먼저 업로드하세요</span>';
         }
@@ -1223,7 +1266,7 @@ ${position ? `- ${position} 직무 관련 핵심 역량` : ''}
 
 // ========== FEATURE 2: RESUME ANALYSIS ==========
 async function analyzeResume() {
-    if (!uploadedFiles.resume.content) {
+    if (!getResumeContent()) {
         showToast('설정 탭에서 자기소개서를 먼저 업로드하세요', 'error');
         return;
     }
@@ -1245,18 +1288,18 @@ async function analyzeResume() {
 
     const prompt = `당신은 한국 대기업 면접관 경력 15년의 면접 전문가입니다.
 
-아래 자기소개서${uploadedFiles.project.content ? '와 프로젝트 기술서' : ''}를 꼼꼼히 분석하여 면접에서 나올 수 있는 예상 질문과 모범 답변을 작성해주세요.
+아래 자기소개서${getProjectContent() ? '와 프로젝트 기술서' : ''}를 꼼꼼히 분석하여 면접에서 나올 수 있는 예상 질문과 모범 답변을 작성해주세요.
 
 **면접 유형**: ${typeLabels[type]}
 ${company ? `**지원 기업/직무**: ${company}` : ''}
 
 ---
 ### 자기소개서 내용:
-${uploadedFiles.resume.content}
+${getResumeContent()}
 
-${uploadedFiles.project.content ? `---
+${getProjectContent() ? `---
 ### 프로젝트 기술서 내용:
-${uploadedFiles.project.content}` : ''}
+${getProjectContent()}` : ''}
 ---
 
 다음 형식으로 작성해주세요:
@@ -1322,7 +1365,7 @@ async function generateAnswers() {
         return;
     }
 
-    if (!uploadedFiles.resume.content && !uploadedFiles.project.content) {
+    if (!getResumeContent() && !getProjectContent()) {
         showToast('설정 탭에서 자기소개서 또는 프로젝트 기술서를 업로드하세요', 'error');
         return;
     }
@@ -1337,13 +1380,13 @@ async function generateAnswers() {
 
     const prompt = `당신은 한국 취업 면접 코치입니다. 지원자의 자기소개서와 프로젝트 기술서를 바탕으로 아래 예상 질문들에 대한 맞춤 답변을 작성해주세요.
 
-${uploadedFiles.resume.content ? `---
+${getResumeContent() ? `---
 ### 자기소개서:
-${uploadedFiles.resume.content}` : ''}
+${getResumeContent()}` : ''}
 
-${uploadedFiles.project.content ? `---
+${getProjectContent() ? `---
 ### 프로젝트 기술서:
-${uploadedFiles.project.content}` : ''}
+${getProjectContent()}` : ''}
 
 ---
 ### 예상 질문 목록:
@@ -1384,7 +1427,7 @@ ${questionList}
 
 // ========== FEATURE 4: TECH INTERVIEW ==========
 async function generateTechQuestions() {
-    if (!uploadedFiles.project.content) {
+    if (!getProjectContent()) {
         showToast('설정 탭에서 프로젝트 기술서를 먼저 업로드하세요', 'error');
         return;
     }
@@ -1407,11 +1450,11 @@ ${field ? `**기술 분야**: ${field}` : ''}
 
 ---
 ### 프로젝트 기술서:
-${uploadedFiles.project.content}
+${getProjectContent()}
 
-${uploadedFiles.resume.content ? `---
+${getResumeContent() ? `---
 ### 자기소개서 (참고):
-${uploadedFiles.resume.content}` : ''}
+${getResumeContent()}` : ''}
 ---
 
 다음 카테고리별로 기술 면접 예상 질문을 생성해주세요:
