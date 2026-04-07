@@ -666,7 +666,7 @@
                 <div class="status-dot" id="firebaseStatus"></div>
                 <span id="firebaseStatusText">Firebase 미연결</span>
             </div>
-            <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; letter-spacing:0.5px;">v1.4</span>
+            <span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; letter-spacing:0.5px;">v1.5</span>
         </div>
     </div>
 </header>
@@ -1016,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     renderHistory();
+    loadFilesFromStorage();
 });
 
 // ========== API KEY ==========
@@ -1109,6 +1110,7 @@ async function handleMultiFileUpload(event, type) {
     if (successCount > 0) {
         showToast(`${label} ${successCount}개 파일 업로드 완료 (총 ${uploadedFiles[type].length}개)`, 'success');
     }
+    saveFilesToStorage();
     renderUploadedFileList(type);
     updateFileIndicators();
     // input 초기화 (같은 파일 재선택 가능하도록)
@@ -1133,8 +1135,28 @@ function renderUploadedFileList(type) {
 function removeUploadedFile(type, index) {
     const removed = uploadedFiles[type].splice(index, 1);
     showToast(`"${removed[0].name}" 제거됨`, 'success');
+    saveFilesToStorage();
     renderUploadedFileList(type);
     updateFileIndicators();
+}
+
+function saveFilesToStorage() {
+    localStorage.setItem('uploaded_resume', JSON.stringify(uploadedFiles.resume));
+    localStorage.setItem('uploaded_project', JSON.stringify(uploadedFiles.project));
+}
+
+function loadFilesFromStorage() {
+    try {
+        const resume = JSON.parse(localStorage.getItem('uploaded_resume') || '[]');
+        const project = JSON.parse(localStorage.getItem('uploaded_project') || '[]');
+        if (resume.length) uploadedFiles.resume = resume;
+        if (project.length) uploadedFiles.project = project;
+        renderUploadedFileList('resume');
+        renderUploadedFileList('project');
+        updateFileIndicators();
+    } catch (e) {
+        console.warn('파일 복원 실패:', e);
+    }
 }
 
 async function readPDF(file) {
